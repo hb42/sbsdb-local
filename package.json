@@ -1,0 +1,51 @@
+{
+  "name": "@hb42/sbsdb-local",
+  "displayname": "SBSDB electron runtime",
+  "description": "IT-Bestand und Hotline-Tool (local binaries)",
+  "version": "1.0.0-beta.10",
+  "copyright": "Copyright (c) 2021 Hartmut Bauer",
+  "author": "hb",
+  "license": "MIT",
+  "main": "run.js",
+  "scripts": {
+    "prep": "rimraf dist && rimraf div/package && copyfiles package.json dist && copyfiles -u 2 resource/config/config_internal.json dist && cd dist && npm i --production",
+    "pack:osx": "electron-packager dist sbsdb --arch x64 --icon resource/icon/sbsdb --overwrite --platform darwin --out div/package/ --no-prune",
+    "pack:": "electron-packager dist sbsdb --arch x64 --icon resource/icon/sbsdb --overwrite --platform win32 --out div/package/ --no-prune",
+    "run:osx": "open div/package/sbsdb-darwin-x64/sbsdb.app",
+    "run:": "div/package/sbsdb-win32-x64/sbsdb.exe",
+    "make": "npm run prep && tsc",
+    "build": "npm run make && npm run pack:$npm_config_platform",
+    "build:all": "npm run make && npm run pack:osx && npm run pack:",
+    "run": "npm run run:$npm_config_platform",
+    "start": "npm run build && npm run run",
+    "release:pre": "npm version prerelease && npm run build:all",
+    "release:patch": "npm version patch && npm run build:all",
+    "release:minor": "npm version minor && npm run build:all",
+    "release:major": "npm version major && npm run build:all",
+    "release": "npm run release:patch"
+  },
+  "repository": "hb42/sbsdb-local",
+  "dependencies": {
+    "electron-window-state": "^5.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^12.20.12",
+    "@types/semver": "^7.3.4",
+    "@typescript-eslint/eslint-plugin": "^5.5.0",
+    "@typescript-eslint/eslint-plugin-tslint": "^5.0.0",
+    "@typescript-eslint/parser": "^5.5.0",
+    "copyfiles": "^2.4.1",
+    "electron": "^16.0.0",
+    "electron-packager": "^15.4.0",
+    "eslint": "^8.2.0",
+    "eslint-config-prettier": "^8.0.0",
+    "eslint-plugin-html": "^6.1.2",
+    "eslint-plugin-import": "^2.25.0",
+    "eslint-plugin-jsdoc": "^37.0.0",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.2.1",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.4.4"
+  }
+}

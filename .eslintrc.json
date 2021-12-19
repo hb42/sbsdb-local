@@ -1,0 +1,63 @@
+{
+  "root": true,
+  "ignorePatterns": [
+    "projects/**/*"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "*.ts"
+      ],
+      "parserOptions": {
+        "project": [
+          "tsconfig.json"
+        ],
+        "createDefaultProgram": true
+      },
+      "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "plugin:prettier/recommended"
+      ],
+      "rules": {
+        "@typescript-eslint/dot-notation": "off",
+        "@typescript-eslint/naming-convention": [
+          "error",
+          {
+            "selector": [
+              "variable",
+              "property"
+            ],
+            "format": [
+              "camelCase",
+              "UPPER_CASE"
+            ]
+          }
+        ],
+        "no-shadow": "off",
+        "@typescript-eslint/no-shadow": [
+          "error"
+        ],
+        "no-trailing-spaces": "off",
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "CallExpression[callee.object.name=\"console\"][callee.property.name=/^(info|time|timeEnd|trace)$/]",
+            "message": "Unexpected property on console object was called"
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "*.html"
+      ],
+      "plugins": [ "html" ],
+      "extends": [
+        "plugin:prettier/recommended"
+      ],
+      "rules": {}
+    }
+  ]
+}
