@@ -1,21 +1,16 @@
 import { BrowserWindow, session, Menu, MenuItemConstructorOptions } from "electron";
 import * as windowStateKeeper from "electron-window-state";
-import * as fs from "fs";
 import * as path from "path";
+import { Config } from "./config/config";
 
 export class Main {
   private static PRELOADSCRIPT = "preload.js";
-  private static CONFIGFILE = "config_internal.json";
 
   private static mainWindow: Electron.BrowserWindow;
   private static application: Electron.App;
-  private static BrowserWindow;
+  private static browserWindow: typeof BrowserWindow;
 
-  private static config = {
-    domain: "",
-    url: "",
-    path: "",
-  };
+  public static config;
 
   private static menuTemplate: MenuItemConstructorOptions[] = [
     {
@@ -40,36 +35,17 @@ export class Main {
           label: "Entwicklertools",
           click: () => Main.mainWindow.webContents.openDevTools(),
           accelerator: process.platform !== "darwin" ? "Shift+Ctrl+I" : "Alt+Cmd+I",
-          //visible: development,
         },
       ],
     },
   ];
 
-  private static getConfig() {
-    const conf = path.join(__dirname, Main.CONFIGFILE);
-    const config = JSON.parse(fs.readFileSync(conf, "utf8"));
-    if (process.platform !== "darwin") {
-      Main.config.domain = config.win.domain;
-      Main.config.url = config.win.url;
-      Main.config.path = config.win.path;
-    } else {
-      Main.config.domain = config.osx.domain;
-      Main.config.url = config.osx.url;
-      Main.config.path = config.osx.path;
-    }
-  }
   private static startApp() {
     console.log("start app");
-    // const ntlmString = process.platform !== "darwin" ? "*v998dpve.v998.intern" : "*keinekekse.net";
-    // const appUrl =
-    //   process.platform !== "darwin"
-    //     ? "https://e077app1.v998dpve.v998.intern"
-    //     : "http://sbsdb.keinekekse.net:8000";
     // allow kerberos
     session.defaultSession.allowNTLMCredentialsForDomains(Main.config.domain);
     // Tell Electron where to load the entry point from
-    Main.mainWindow.loadURL(Main.config.url + Main.config.path);
+    void Main.mainWindow.loadURL(Main.config.url + Main.config.path);
 
     // Debug
     Main.mainWindow.webContents.openDevTools();
@@ -106,38 +82,38 @@ export class Main {
     Menu.setApplicationMenu(menu);
   }
 
-  private static onWindowAllClosed() {
+  private static onWindowAllClosed = () => {
     if (process.platform !== "darwin") {
       Main.application.quit();
     }
-  }
+  };
 
-  private static onActivate() {
+  private static onActivate = () => {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (Main.mainWindow === null) {
       Main.onReady();
     }
-  }
+  };
 
-  private static onClose() {
+  private static onClose = () => {
     // Dereference the window object.
     Main.mainWindow = null;
-  }
+  };
 
-  private static onReady() {
+  private static onReady = () => {
     Main.createWindow();
     Main.startApp();
-  }
+  };
 
   public static main(app: Electron.App, browserWindow: typeof BrowserWindow) {
     // we pass the Electron.App object and the
     // Electron.BrowserWindow into this function
     // so this class has no dependencies. This
     // makes the code easier to write tests for
-    Main.BrowserWindow = browserWindow;
+    Main.browserWindow = browserWindow;
     Main.application = app;
-    Main.getConfig();
+    Main.config = new Config();
     Main.application.on("window-all-closed", Main.onWindowAllClosed);
     Main.application.on("activate", Main.onActivate);
     Main.application.on("ready", Main.onReady);

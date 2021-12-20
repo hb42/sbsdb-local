@@ -2,42 +2,48 @@
  *  Create a safe, bi-directional, synchronous bridge across isolated contexts
  *  -> https://www.electronjs.org/docs/latest/api/context-bridge
  */
-// import { exec, execFile, spawn } from "child_process";
-import { contextBridge, ipcRenderer } from "electron";
-import { Arbeitsplatz } from "./model/arbeitsplatz";
+import { execFile } from "child_process";
+import { contextBridge } from "electron";
+import { Config } from "./config/config";
 
 const APIKEY = "electron";
+const config = new Config();
 
 // class o.ae. funktioniert hier nicht, nur simples object
 const api = {
-  doThing: () => ipcRenderer.send("do-a-thing"),
-
-  test: (msg) => console.log("Message from renderer: " + msg + " / __dirname: " + __dirname),
+  test: (msg: string) =>
+    console.log("Message from renderer: " + msg + " / __dirname: " + __dirname),
+  // __dirname win32: ...package\sbsdb-win32-x64\resources\app
+  //           macOS: ...package/sbsdb-darwin-x64/sbsdb.app/Contents/Resources/app
 
   version: () => process.versions.electron,
 
-  exec: (ap: Arbeitsplatz, job: string) => {
+  exec: (job: string, ap) => {
     console.debug("sbsdb-local exec: " + job);
     console.dir(ap);
 
-    // var executablePath = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
-    // var parameters = ["--incognito"];
-    //
-    // execFile(executablePath, parameters, (err, data) => {
-    //   if(err){
-    //     console.error(err);
-    //     return;
-    //   }
-    //   console.log(data.toString());
-    // });
+    const shell = config.shell;
+    const parameters = [
+      config.script,
+      "-job",
+      job,
+      "-ap",
+      JSON.stringify(ap, (key, value) => {
+        // moegliche Rekursionen aus dem Objekt entfernen
+        if (key === "ap" || key === "children") {
+          return undefined;
+        }
+        return value;
+      }),
+    ];
 
-    // exec("ls -la", (err, stdout, stderr) => {
-    //   if (err) {
-    //     console.error(err);
-    //     return;
-    //   }
-    //   console.log(stdout);
-    // });
+    execFile(shell, parameters, (err, data) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      console.log(data.toString());
+    });
   },
 };
 
