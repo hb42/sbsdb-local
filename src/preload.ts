@@ -22,20 +22,16 @@ const api = {
     console.debug("sbsdb-local exec: " + job);
     console.dir(ap);
 
+    const json = JSON.stringify(ap, (key, value: unknown) => {
+      // moegliche Rekursionen aus dem Objekt entfernen
+      if (key === "ap" || key === "children") {
+        return undefined;
+      }
+      return value;
+    }).replace(/"/g, "'");
+
     const shell = config.shell;
-    const parameters = [
-      config.script,
-      "-job",
-      job,
-      "-ap",
-      JSON.stringify(ap, (key, value) => {
-        // moegliche Rekursionen aus dem Objekt entfernen
-        if (key === "ap" || key === "children") {
-          return undefined;
-        }
-        return value;
-      }),
-    ];
+    const parameters = [config.script, "-job", job, "-ap", '"' + json + '"'];
 
     execFile(shell, parameters, (err, data) => {
       if (err) {

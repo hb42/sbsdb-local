@@ -10,7 +10,7 @@ export class Main {
   private static application: Electron.App;
   private static browserWindow: typeof BrowserWindow;
 
-  public static config;
+  public static config: Config;
 
   private static menuTemplate: MenuItemConstructorOptions[] = [
     {

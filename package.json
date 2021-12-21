@@ -2,7 +2,7 @@
   "name": "@hb42/sbsdb-local",
   "displayname": "SBSDB electron runtime",
   "description": "IT-Bestand und Hotline-Tool (local binaries)",
-  "version": "1.0.0-beta.41",
+  "version": "1.0.0-beta.47",
   "copyright": "Copyright (c) 2021 Hartmut Bauer",
   "author": "hb",
   "license": "MIT",
