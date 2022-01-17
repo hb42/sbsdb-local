@@ -11,7 +11,7 @@ const APIKEY = "electron";
 const config = new Config();
 
 const ipString =
-  /^\s*(\d|[01]?\d\d|2[0-4]\d|25[0-5])\.(\d|[01]?\d\d|2[0-4]\d|25[0-5])\.(\d|[01]?\d\d|2[0-4]\d|25[0-5])\.(\d|[01]?\d\d|2[0-4]\d|25[0-5])\s*$/;
+  /^\s*(([1-9]|[1]?\d\d|2[0-4]\d|25[0-4])\.(\d|[1]?\d\d|2[0-4]\d|25[0-5])\.(\d|[1]?\d\d|2[0-4]\d|25[0-5])\.(2[0-4]\d|25[0-4]|[1]?\d\d|[1-9]))(\D|$)/;
 
 // API fuer den Aufruf aus der Anwendung
 // class o.ae. funktioniert hier nicht, nur simples object
@@ -39,13 +39,14 @@ const api = {
     } else {
       // keine Namensaufloesung
       if (ipString.test(ap.ipStr)) {
-        ipAddr = ap.ipStr as string;
+        // erste gueltige IP aus dem String holen
+        ipAddr = ipString.exec(ap.ipStr)[1];
       } else {
         // und keine gueltige IP-Adresse
         return {
           rc: 1,
           info:
-            "Hostname kann nicht aufgelöst werden und es ist keine " +
+            "Hostname " + ap.apname + " kann nicht aufgelöst werden und es ist keine " +
             "gültige IP-Adresse in der Datenbank vorhanden",
         };
       }
@@ -59,17 +60,10 @@ const api = {
     }).replace(/"/g, "'");
 
     const shell = config.shell;
-    const parameters = [
-      config.script,
-      "-job",
-      job,
-      "-hostname",
-      hostname,
-      "-ip",
-      ipAddr,
-      "-ap",
-      '"' + json + '"',
-    ];
+    const parameters = [config.script, "-job", job, "-ip", ipAddr, "-ap", '"' + json + '"'];
+    if (hostname) {
+      parameters.push("-hostname", hostname);
+    }
 
     execFile(shell, parameters, (err, stdout, errout) => {
       if (err) {
