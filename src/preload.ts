@@ -42,11 +42,13 @@ const api = {
         // erste gueltige IP aus dem String holen
         ipAddr = ipString.exec(ap.ipStr)[1];
       } else {
-        // und keine gueltige IP-Adresse
+        // keine gueltige IP-Adresse -> Ende
         return {
           rc: 1,
           info:
-            "Hostname " + ap.apname + " kann nicht aufgelöst werden und es ist keine " +
+            "Hostname " +
+            ap.apname +
+            " kann nicht aufgelöst werden und es ist keine " +
             "gültige IP-Adresse in der Datenbank vorhanden",
         };
       }
@@ -65,14 +67,18 @@ const api = {
       parameters.push("-hostname", hostname);
     }
 
-    execFile(shell, parameters, (err, stdout, errout) => {
-      if (err) {
-        console.error(err);
-      }
-      console.debug(stdout);
-      console.debug(errout);
+    return new Promise<{ rc: number; info: string }>((resolve, reject) => {
+      execFile(shell, parameters, (err, stdout, errout) => {
+        console.debug("STDOUT: " + stdout);
+        console.debug("ERROUT: " + errout);
+        if (err) {
+          console.dir(err);
+          resolve({ rc: err.code, info: errout });
+        } else {
+          resolve({ rc: 0, info: "OK" });
+        }
+      });
     });
-    return { rc: 0, info: "OK" };
   },
 };
 
