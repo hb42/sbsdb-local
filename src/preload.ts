@@ -13,8 +13,16 @@ const config = new Config();
 const ipString =
   /^\s*(([1-9]|[1]?\d\d|2[0-4]\d|25[0-4])\.(\d|[1]?\d\d|2[0-4]\d|25[0-5])\.(\d|[1]?\d\d|2[0-4]\d|25[0-5])\.(2[0-4]\d|25[0-4]|[1]?\d\d|[1-9]))(\D|$)/;
 
-// API fuer den Aufruf aus der Anwendung
-// class o.ae. funktioniert hier nicht, nur simples object
+interface LocalApi {
+  test(msg: string): void;
+  version(): string;
+  exec(job: string, ap): Promise<{ rc: number; info: string }>;
+}
+
+/**
+ * API fuer den Aufruf aus der Anwendung
+ * class o.ae. funktioniert hier nicht, nur simples object
+ */
 const api = {
   test: (msg: string) =>
     console.log("Message from renderer: " + msg + " / __dirname: " + __dirname),
@@ -23,7 +31,7 @@ const api = {
 
   version: () => process.versions.electron,
 
-  exec: async (job: string, ap): Promise<{ rc: number; info: string }> => {
+  exec: async (job: string, param: string, ap): Promise<{ rc: number; info: string }> => {
     console.debug("sbsdb-local exec: " + job);
     console.dir(ap);
 
@@ -63,6 +71,10 @@ const api = {
 
     const shell = config.shell;
     const parameters = [config.script, "-job", job, "-ip", ipAddr, "-ap", '"' + json + '"'];
+    if (param) {
+      // TODO fuer komplexere Programm-Parameter muesste der param-String noch escaped werden.
+      parameters.push("-param", '"' + param + '"');
+    }
     if (hostname) {
       parameters.push("-hostname", hostname);
     }
@@ -80,6 +92,6 @@ const api = {
       });
     });
   },
-};
+} as LocalApi;
 
 contextBridge.exposeInMainWorld(APIKEY, api);

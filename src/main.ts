@@ -48,7 +48,7 @@ export class Main {
     void Main.mainWindow.loadURL(Main.config.url + Main.config.path);
 
     // Debug
-    Main.mainWindow.webContents.openDevTools();
+    // Main.mainWindow.webContents.openDevTools();
 
     Main.mainWindow.on("closed", Main.onClose);
   }
