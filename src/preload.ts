@@ -13,6 +13,9 @@ const config = new Config();
 const ipString =
   /^\s*(([1-9]|[1]?\d\d|2[0-4]\d|25[0-4])\.(\d|[1]?\d\d|2[0-4]\d|25[0-5])\.(\d|[1]?\d\d|2[0-4]\d|25[0-5])\.(2[0-4]\d|25[0-4]|[1]?\d\d|[1-9]))(\D|$)/;
 
+// Standard-Paramter fuer Powershell
+const psDefault = ["-NoProfile"];
+
 interface LocalApi {
   test(msg: string): void;
   version(): string;
@@ -41,6 +44,7 @@ const api = {
       .lookup(ap.apname, { family: 4 })
       .then((result) => result.address)
       .catch(() => null)) as string;
+
     if (ipAddr) {
       // hostname gefunden
       hostname = ap.apname as string;
@@ -70,7 +74,8 @@ const api = {
     }).replace(/"/g, "'");
 
     const shell = config.shell;
-    const parameters = [config.script, "-job", job, "-ip", ipAddr, "-ap", '"' + json + '"'];
+    const parameters = [...psDefault];
+    parameters.push("-file", config.script, "-job", job, "-ip", ipAddr, "-ap", '"' + json + '"');
     if (param) {
       // TODO fuer komplexere Programm-Parameter muesste der param-String noch escaped werden.
       parameters.push("-param", '"' + param + '"');
@@ -80,6 +85,7 @@ const api = {
     }
 
     return new Promise<{ rc: number; info: string }>((resolve, reject) => {
+      // execFile startet im Root der Anwendung (das Verzeichnis, in dem die .exe liegt)
       execFile(shell, parameters, (err, stdout, errout) => {
         console.debug("STDOUT: " + stdout);
         console.debug("ERROUT: " + errout);
