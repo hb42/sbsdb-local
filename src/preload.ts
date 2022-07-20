@@ -18,8 +18,13 @@ const psDefault = ["-NoProfile"];
 
 interface LocalApi {
   test(msg: string): void;
-  version(): string;
+  version(): string[]; // 0: electron runtime, 1: this app
   exec(job: string, ap): Promise<{ rc: number; info: string }>;
+}
+
+interface Arbeitsplatz {
+  apname: string;
+  ipStr: string;
 }
 
 /**
@@ -32,9 +37,13 @@ const api = {
   // __dirname win32: ...package\sbsdb-win32-x64\resources\app
   //           macOS: ...package/sbsdb-darwin-x64/sbsdb.app/Contents/Resources/app
 
-  version: () => process.versions.electron,
+  version: () => [process.versions.electron, config.version],
 
-  exec: async (job: string, param: string, ap): Promise<{ rc: number; info: string }> => {
+  exec: async (
+    job: string,
+    param: string,
+    ap: Arbeitsplatz
+  ): Promise<{ rc: number; info: string }> => {
     console.debug("sbsdb-local exec: " + job);
     console.dir(ap);
 
@@ -47,7 +56,7 @@ const api = {
 
     if (ipAddr) {
       // hostname gefunden
-      hostname = ap.apname as string;
+      hostname = ap.apname;
     } else {
       // keine Namensaufloesung
       if (ipString.test(ap.ipStr)) {
@@ -85,10 +94,11 @@ const api = {
     }
 
     return new Promise<{ rc: number; info: string }>((resolve, reject) => {
-      // execFile startet im Root der Anwendung (das Verzeichnis, in dem die .exe liegt)
+      // execFile startet im Root der Electron-Anwendung (das Verzeichnis, in dem die .exe liegt)
       execFile(shell, parameters, (err, stdout, errout) => {
         console.debug("STDOUT: " + stdout);
         console.debug("ERROUT: " + errout);
+        console.debug("RC: " + err?.code.toString(10) ?? "0");
         if (err) {
           console.dir(err);
           resolve({ rc: err.code, info: errout });
