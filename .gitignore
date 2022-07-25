@@ -6,6 +6,9 @@
 # Sicherungs-Dateien
 *.sav
 
+# Script-Verzeichnis (Binaries nicht nach github & ps1 ist auch nicht fuer die Oeffentlichkeit)
+/resource/script/
+
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output

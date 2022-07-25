@@ -44,8 +44,7 @@ const api = {
     param: string,
     ap: Arbeitsplatz
   ): Promise<{ rc: number; info: string }> => {
-    console.debug("sbsdb-local exec: " + job);
-    console.dir(ap);
+    console.debug("sbsdb-local exec: " + job + " for " + ap.apname);
 
     let hostname = "";
     // DNS-Lookup
@@ -84,9 +83,10 @@ const api = {
 
     const shell = config.shell;
     const parameters = [...psDefault];
-    parameters.push("-file", config.script, "-job", job, "-ip", ipAddr, "-ap", '"' + json + '"');
+    const scriptfile = __dirname + "/" + config.script;
+    parameters.push("-file", scriptfile, "-job", job, "-ip", ipAddr, "-ap", '"' + json + '"');
     if (param) {
-      // TODO fuer komplexere Programm-Parameter muesste der param-String noch escaped werden.
+      // TODO: fuer komplexere Programm-Parameter muesste der param-String noch escaped werden.
       parameters.push("-param", '"' + param + '"');
     }
     if (hostname) {
@@ -94,11 +94,10 @@ const api = {
     }
 
     return new Promise<{ rc: number; info: string }>((resolve, reject) => {
-      // execFile startet im Root der Electron-Anwendung (das Verzeichnis, in dem die .exe liegt)
       execFile(shell, parameters, (err, stdout, errout) => {
         console.debug("STDOUT: " + stdout);
         console.debug("ERROUT: " + errout);
-        console.debug("RC: " + err?.code.toString(10) ?? "0");
+        console.debug("RC: " + (err?.code.toString(10) ?? "0"));
         if (err) {
           console.dir(err);
           resolve({ rc: err.code, info: errout });
